@@ -18,9 +18,9 @@ export const Sidebar = ({ className }: Props) => {
       )}
     >
       <Link href="/learn">
-        <div className="pt-8 pl-4 pb-7 flex items-center gap-x-3">
-          <Image src="/mascot.png" height={40} width={40} alt="mascot" />
-          <h1 className="text-2xl font-extrabold text-green-600 tracking-wide">
+        <div className="pt-8 pl-4 pb-10 flex items-center gap-x-3">
+          <Image src="/mascot-person.png" height={50} width={50} alt="mascot" />
+          <h1 className="text-2xl font-extrabold text-black tracking-wide">
             {" "}
             ALBlingo
           </h1>
@@ -34,14 +34,14 @@ export const Sidebar = ({ className }: Props) => {
           iconSrc="/leaderboard.png"
         />
         <SidebarItem label="Quests" href="/quests" iconSrc="/quests.png" />
-        <SidebarItem label="Shop" href="/shop" iconSrc="/shop.png" />
+        {/* <SidebarItem label="Shop" href="/shop" iconSrc="/shop.png" /> */}
       </div>
       <div className="p-4">
         <ClerkLoading>
           <Loader className="h-5 w-5 text-muted-foreground animate-spin" />
         </ClerkLoading>
         <ClerkLoaded>
-          <UserButton afterSignOutUrl="/" />
+          <UserButton/>
         </ClerkLoaded>
       </div>
     </div>
