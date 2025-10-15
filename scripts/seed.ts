@@ -79,30 +79,84 @@ const main = async () => {
                 order: 1,
                 question: 'Which one of these is "the man"',
             },
+            {
+                id: 2,
+                lessonId: 1,
+                type: "ASSIST",
+                order: 2,
+                question: '"the man"',
+            },
+            {
+                id: 3,
+                lessonId: 1,
+                type: "SELECT",
+                order: 3,
+                question: 'Which one of these is "the robot"',
+            },
         ]);
 
         await db.insert(schema.challengeOptions).values([
             {
-                id: 1,
                 challengeId: 1, //Which one of these is "the man"?
-                imageSrc: "/man.svg",
+                imageSrc: "/man.png",
                 correct: true,
                 text: "burri",
                 audioSrc: "/alb_man.mp3",
             },
             {
-                id: 2,
                 challengeId: 1,
-                imageSrc: "/woman.svg",
+                imageSrc: "/woman.png",
                 correct: false,
                 text: "gruaja",
                 audioSrc: "/alb_woman.mp3",
             },
             {
-                id: 3,
                 challengeId: 1,
-                imageSrc: "/robot.svg",
+                imageSrc: "/robot.png",
                 correct: false,
+                text: "roboti",
+                audioSrc: "/alb_robot.mp3",
+            },
+        ]);
+        await db.insert(schema.challengeOptions).values([
+            {
+                challengeId: 2, //Which one of these is "the man"?
+                correct: true,
+                text: "burri",
+                audioSrc: "/alb_man.mp3",
+            },
+            {
+                challengeId: 2,
+                correct: false,
+                text: "gruaja",
+                audioSrc: "/alb_woman.mp3",
+            },
+            {
+                challengeId: 2,
+                correct: false,
+                text: "roboti",
+                audioSrc: "/alb_robot.mp3",
+            },
+        ]);
+        await db.insert(schema.challengeOptions).values([
+            {
+                challengeId: 3,
+                imageSrc: "/man.png",
+                correct: false,
+                text: "burri",
+                audioSrc: "/alb_man.mp3",
+            },
+            {
+                challengeId: 3,
+                imageSrc: "/woman.png",
+                correct: false,
+                text: "gruaja",
+                audioSrc: "/alb_woman.mp3",
+            },
+            {
+                challengeId: 3,
+                imageSrc: "/robot.png",
+                correct: true,
                 text: "roboti",
                 audioSrc: "/alb_robot.mp3",
             },
