@@ -34,7 +34,7 @@ export const Sidebar = ({ className }: Props) => {
           iconSrc="/leaderboard.png"
         />
         <SidebarItem label="Quests" href="/quests" iconSrc="/quests.png" />
-        {/* <SidebarItem label="Shop" href="/shop" iconSrc="/shop.png" /> */}
+        <SidebarItem label="Shop" href="/shop" iconSrc="/shop.png" />
       </div>
       <div className="p-4">
         <ClerkLoading>
