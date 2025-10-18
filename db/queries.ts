@@ -8,6 +8,7 @@ import {
   units,
   userProgress,
   lessons,
+  userSubscription,
 } from "./schema";
 
 export const getUserProgress = cache(async () => {
@@ -81,7 +82,16 @@ export const getCourses = cache(async () => {
 export const getCourseById = cache(async (courseId: number) => {
   const data = await db.query.courses.findFirst({
     where: eq(courses.id, courseId),
-    // populate units and lessons
+    with:{
+      units:{
+        orderBy: (units, {asc}) => [asc(units.order)],
+        with:{
+          lessons:{
+            orderBy: (lessons, {asc}) => [asc(lessons.order)],
+          }
+        }
+      }
+    }
   });
   return data;
 });
@@ -202,3 +212,24 @@ export const getLessonPercentage = cache(async () => {
 
   return percentage;
 });
+
+const DAY_IN_MS = 86_400_000;
+
+export const getUserSubscription = cache(async() => {
+  const {userId} = await auth();
+
+  if(!userId) return null;
+
+  const data = await db.query.userSubscription.findFirst({
+    where: eq(userSubscription.userId, userId),
+  });
+
+  if(!data) return null;
+
+  const isActive = data.stripePriceId && data.stripeCurrentPeriodEnd?.getTime()! + DAY_IN_MS > Date.now();
+
+  return {
+    ...data,
+    isActive: !!isActive,
+  }
+})
