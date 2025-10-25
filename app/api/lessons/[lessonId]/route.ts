@@ -6,14 +6,15 @@ import { NextResponse } from "next/server";
 
 export const GET = async (
   req: Request,
-  { params }: { params: { lessonId: number } }
+  context: { params: Promise<{ lessonId: string }> }
 ) => {
-  if (!isAdmin()) {
+  const { lessonId } = await context.params;
+  if (!await isAdmin()) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
   const data = await db.query.lessons.findFirst({
-    where: eq(lessons.id, params.lessonId),
+    where: eq(lessons.id, Number(lessonId)),
   });
 
   return NextResponse.json(data);
@@ -21,9 +22,10 @@ export const GET = async (
 
 export const PUT = async (
   req: Request,
-  { params }: { params: { lessonId: number } }
+  context: { params: Promise<{ lessonId: string }> }
 ) => {
-  if (!isAdmin()) {
+  const { lessonId } = await context.params;
+  if (!await isAdmin()) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
@@ -34,7 +36,7 @@ export const PUT = async (
     .set({
       ...body,
     })
-    .where(eq(lessons.id, params.lessonId))
+    .where(eq(lessons.id, Number(lessonId)))
     .returning();
 
   return NextResponse.json(data[0]);
@@ -42,15 +44,16 @@ export const PUT = async (
 
 export const DELETE = async (
   req: Request,
-  { params }: { params: { lessonId: number } }
+  context: { params: Promise<{ lessonId: string }> }
 ) => {
-  if (!isAdmin()) {
+  const { lessonId } = await context.params;
+  if (!await isAdmin()) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
   const data = await db
     .delete(lessons)
-    .where(eq(lessons.id, params.lessonId))
+    .where(eq(lessons.id, Number(lessonId)))
     .returning();
 
   return NextResponse.json(data[0]);
