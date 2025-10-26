@@ -1,7 +1,7 @@
 "use client";
 
 import { challengeOptions, challenges, userSubscription } from "@/db/schema";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
 import { Challenge } from "./challenge";
@@ -15,7 +15,7 @@ import { ResultCard } from "./result-card";
 import { useRouter } from "next/navigation";
 import { useHeartsModal } from "@/store/use-hearts-modal";
 import { usePracticeModal } from "@/store/use-practice-modal";
-import { useMount, useWindowSize } from "react-use"; // keep useWindowSize, remove useAudio
+import { useMount, useWindowSize } from "react-use";
 
 type Props = {
   initialPercentage: number;
@@ -30,12 +30,9 @@ type Props = {
     | null;
 };
 
-// ✅ simple helper for playing sounds safely
 const playSound = (src: string) => {
   const audio = new Audio(src);
-  audio.play().catch(() => {
-    // Ignore autoplay restriction errors
-  });
+  audio.play().catch(() => {});
 };
 
 export const Quiz = ({
@@ -66,25 +63,40 @@ export const Quiz = ({
 
   const [selectedOption, setSelectedOption] = useState<number>();
   const [status, setStatus] = useState<"correct" | "wrong" | "none">("none");
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState<number>(0);
+
+  const feedbackCache = useRef<Record<string, string>>({});
 
   const challenge = challenges[activeIndex];
   const options = challenge?.challengeOptions ?? [];
 
-  // open practice modal if lesson fully completed
   useMount(() => {
     if (initialPercentage === 100) {
       openPracticeModal();
     }
+
+    fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: "warmup",
+        userAnswer: "warmup",
+        correctAnswer: "warmup",
+      }),
+    }).catch(() => {});
   });
 
-  // 🧠 handle sound for lesson completion
   useEffect(() => {
     if (!challenge) {
       playSound("/finish.wav");
     }
   }, [challenge]);
 
-  const onNext = () => setActiveIndex((current) => current + 1);
+  const onNext = () => {
+    setActiveIndex((current) => current + 1);
+    setAttempts(0);
+  };
 
   const onSelect = (id: number) => {
     if (status !== "none") return;
@@ -93,6 +105,8 @@ export const Quiz = ({
 
   const onContinue = () => {
     if (!selectedOption) return;
+
+    setFeedback(null);
 
     if (status === "wrong") {
       setStatus("none");
@@ -104,6 +118,7 @@ export const Quiz = ({
       onNext();
       setStatus("none");
       setSelectedOption(undefined);
+      setFeedback(null);
       return;
     }
 
@@ -111,7 +126,6 @@ export const Quiz = ({
     if (!correctOption) return;
 
     if (correctOption.id === selectedOption) {
-      // ✅ correct answer
       startTransition(() => {
         upsertChallengeProgress(challenge.id)
           .then((response) => {
@@ -123,8 +137,8 @@ export const Quiz = ({
             playSound("/correct.wav");
             setStatus("correct");
             setPercentage((prev) => prev + 100 / challenges.length);
+            setAttempts(0);
 
-            // Practice mode gives extra heart
             if (initialPercentage === 100) {
               setHearts((prev) => Math.min(prev + 1, 5));
             }
@@ -132,7 +146,6 @@ export const Quiz = ({
           .catch(() => toast.error("Something went wrong. Please try again!"));
       });
     } else {
-      // ❌ wrong answer
       startTransition(() => {
         reduceHearts(challenge.id)
           .then((response) => {
@@ -143,17 +156,47 @@ export const Quiz = ({
 
             playSound("/incorrect.wav");
             setStatus("wrong");
+            setAttempts((prev) => prev + 1);
 
             if (!response?.error) {
               setHearts((prev) => Math.max(prev - 1, 0));
             }
+
+            const userOption = options.find((o) => o.id === selectedOption);
+            if (!userOption || !correctOption) return;
+
+            const cacheKey = `${challenge.id}_${userOption.text}`;
+            const cached = feedbackCache.current[cacheKey];
+            if (cached) {
+              setFeedback(cached);
+              return;
+            }
+            fetch("/api/feedback", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                question: challenge.question,
+                userAnswer: userOption.text,
+                correctAnswer: correctOption.text,
+                attempt: attempts + 1,
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                const explanation =
+                  data.explanation || "No feedback available.";
+                feedbackCache.current[cacheKey] = explanation;
+                setFeedback(explanation);
+              })
+              .catch(() => {
+                setFeedback("Error generating feedback.");
+              });
           })
           .catch(() => toast.error("Something went wrong. Please try again!"));
       });
     }
   };
 
-  // 🏁 When lesson finished
   if (!challenge) {
     return (
       <>
@@ -189,7 +232,6 @@ export const Quiz = ({
     );
   }
 
-  // 🧩 Normal challenge screen
   const title =
     challenge.type === "ASSIST"
       ? "Select the correct meaning"
@@ -223,6 +265,11 @@ export const Quiz = ({
                 disabled={pending}
                 type={challenge.type}
               />
+              {feedback && (
+                <p className="text-sm text-center text-rose-600 mt-4 italic">
+                  💡 {feedback}
+                </p>
+              )}
             </div>
           </div>
         </div>
