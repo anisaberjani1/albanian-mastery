@@ -121,3 +121,12 @@ export const userSubscription = pgTable("user_subscription", {
   stripePriceId: text("stripe_price_id").notNull(),
   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end").notNull(),
 });
+
+export const adaptiveChallenges = pgTable("adaptive_challenges", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  topic: text("topic").notNull(),
+  difficulty: text("difficulty").notNull(),
+  accuracy: integer("accuracy").default(0),
+  feedback: text("feedback"),
+});
