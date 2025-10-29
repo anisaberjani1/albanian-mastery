@@ -8,35 +8,50 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { Loader } from "lucide-react";
-import Image from "next/image";
+import Link from "next/link";
 
 export const Header = () => {
   return (
-    <header className="h-20 w-full border-b-2 border-slate-200 px-4">
-      <div className="lg:max-w-screen-lg mx-auto flex items-center justify-between h-full">
-        <div className="pt-8 pl-4 pb-7 flex items-center gap-x-3">
-          <Image src="/mascot-person.png" height={50} width={50} alt="mascot" />
-          <h1 className="text-2xl font-extrabold text-black tracking-wide">
-            {" "}
-            ALBlingo
-          </h1>
-        </div>
+    <header className="w-full h-20 bg-white border-b border-[var(--border)] shadow-sm">
+      <div className="max-w-[1280px] mx-auto flex items-center justify-between h-full px-6">
+        <Link href="/" className="flex items-center gap-3">
+          {/* <Image
+            src="/logo1.png"
+            height={46}
+            width={46}
+            alt="Logo"
+            className="drop-shadow-sm"
+          /> */}
+          <span className="text-2xl font-extrabold text-[var(--foreground)] tracking-wide">
+            Albanian
+          </span>
+          <span className="text-2xl font-extrabold text-[var(--secondary)] tracking-wide">
+            Mastery
+          </span>
+        </Link>
+
         <ClerkLoading>
           <Loader className="h-5 w-5 text-muted-foreground animate-spin" />
         </ClerkLoading>
+
         <ClerkLoaded>
           <SignedIn>
-            <UserButton />
+            <UserButton
+            />
           </SignedIn>
+
           <SignedOut>
-            <SignInButton
-              mode="modal"
-              fallbackRedirectUrl="/learn"
-            >
-              <Button size="lg" variant="ghost">
-                Login
-              </Button>
-            </SignInButton>
+            <div className="flex items-center gap-3">
+              <SignInButton mode="modal" fallbackRedirectUrl="/learn">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  className="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white hover:text-[var(--primary)] px-8 py-6"
+                >
+                  Login
+                </Button>
+              </SignInButton>
+            </div>
           </SignedOut>
         </ClerkLoaded>
       </div>

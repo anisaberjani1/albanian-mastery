@@ -124,9 +124,18 @@ export const userSubscription = pgTable("user_subscription", {
 
 export const adaptiveChallenges = pgTable("adaptive_challenges", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").notNull(),
+  userId: text("user_id")
+    .references(() => userProgress.userId, { onDelete: "cascade" }) 
+    .notNull(),
   topic: text("topic").notNull(),
   difficulty: text("difficulty").notNull(),
   accuracy: integer("accuracy").default(0),
   feedback: text("feedback"),
 });
+
+export const adaptiveChallengesRelations = relations(adaptiveChallenges, ({ one }) => ({
+  user: one(userProgress, {
+    fields: [adaptiveChallenges.userId],
+    references: [userProgress.userId],
+  }),
+}));
