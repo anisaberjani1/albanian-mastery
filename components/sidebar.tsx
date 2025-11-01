@@ -13,17 +13,13 @@ export const Sidebar = ({ className }: Props) => {
   return (
     <div
       className={cn(
-        "flex h-full lg:w-[256px] lg:fixed left-0 top-0 px-4 border-r-2 flex-col",
+        "flex h-full lg:w-[265px] lg:fixed left-0 top-0 px-4 flex-col bg-section border-1 border-border shadow-sm",
         className
       )}
     >
       <Link href="/">
-        <div className="pt-8 pl-4 pb-10 flex items-center gap-x-3">
-          <Image src="/mascot-person.png" height={50} width={50} alt="mascot" />
-          <h1 className="text-2xl font-extrabold text-black tracking-wide">
-            {" "}
-            ALBlingo
-          </h1>
+        <div className="pb-4 flex items-center gap-x-3">
+          <Image src="/logo1.png" height={80} width={220} alt="albanian mastery" />
         </div>
       </Link>
       <div className="flex flex-col gap-y-2 flex-1">
@@ -34,7 +30,7 @@ export const Sidebar = ({ className }: Props) => {
           iconSrc="/leaderboard.png"
         />
         <SidebarItem label="Quests" href="/quests" iconSrc="/quests.png" />
-        <SidebarItem label="Shop" href="/shop" iconSrc="/shop.png" />
+        {/* <SidebarItem label="Shop" href="/shop" iconSrc="/shop.png" /> */}
       </div>
       <div className="p-4">
         <ClerkLoading>

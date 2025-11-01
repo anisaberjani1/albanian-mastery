@@ -48,7 +48,7 @@ export const HowItWorks = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-6">
           {steps.map((step) => (
             <HoverCard key={step.number}>
-              <HoverCardTrigger asChild>
+              <HoverCardTrigger asChild className="bg-[var(--primary)]/5 p-6 rounded-2xl">
                 <div className="flex flex-col items-center text-center gap-4 cursor-pointer group">
                   <div
                     className={`w-12 h-12 flex items-center justify-center rounded-full ${step.color} font-bold text-lg shadow-sm group-hover:scale-110 transition-transform duration-300`}

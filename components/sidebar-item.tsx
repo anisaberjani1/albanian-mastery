@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,19 +18,23 @@ export const SidebarItem = ({ label, iconSrc, href }: Props) => {
 
   return (
     <Button
-      variant={active ? "sidebarOutline" : "sidebar"}
-      className="justify-start h-[52px]"
+      className={cn(
+        "justify-start h-[52px] w-full text-foreground font-medium tracking-wide transition-all",
+        active
+          ? "bg-primary/5 text-primary border-l-4 border-primary"
+          : "hover:bg-primary/5 hover:text-primary"
+      )}
       asChild
     >
-      <Link href={href}>
+      <Link href={href} className="flex items-center w-full">
         <Image
           src={iconSrc}
           alt={label}
-          className="mr-5"
+          className="mr-4"
           height={36}
           width={36}
         />
-        {label}
+        <span>{label}</span>
       </Link>
     </Button>
   );
