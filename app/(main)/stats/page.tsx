@@ -26,7 +26,7 @@ interface ChartData {
   difficulty: number;
 }
 
-export const LearningProgress = () => {
+export default function StatsPage() {
   const [data, setData] = useState<ChartData[]>([]);
 
   useEffect(() => {
@@ -58,14 +58,16 @@ export const LearningProgress = () => {
   }, []);
 
   return (
-    <section className="w-full bg-[var(--background)] py-24 px-6">
+    <section className="w-full bg-[var(--background)] py-12 px-6">
       <div className="max-w-[1100px] mx-auto text-center">
-        <h2 className="text-3xl lg:text-4xl font-extrabold text-[var(--heading)] mb-10">
-          Your Adaptive Learning Progress
-        </h2>
-        <p className="text-[var(--paragraph)] max-w-[600px] mx-auto mb-16">
-          The chart below shows how your accuracy evolves as the AI adjusts difficulty levels through adaptive sessions.
-        </p>
+        <div className="flex flex-col items-center">
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-[var(--heading)] mt-4 mb-6">
+            Your Adaptive Learning Progress
+          </h2>
+          <p className="text-[var(--paragraph)] max-w-[600px] mx-auto mb-16">
+            This chart shows how your accuracy evolves as the AI adapts challenge difficulty over time.
+          </p>
+        </div>
 
         <div className="bg-[var(--primary)]/5 rounded-[1.15rem] p-10 shadow-[0_8px_20px_rgba(17,70,143,0.08)]">
           {data.length === 0 ? (
@@ -140,4 +142,4 @@ export const LearningProgress = () => {
       </div>
     </section>
   );
-};
+}
