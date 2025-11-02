@@ -7,34 +7,39 @@ type Props = {
 };
 
 export const ResultCard = ({ value, variant }: Props) => {
-    const imageSrc = variant === "hearts" ? "/heart.png" : "/points.png";
+  const imageSrc = variant === "hearts" ? "/heart.png" : "/points.png";
+  const label = variant === "hearts" ? "Hearts left" : "Total XP";
+
   return (
     <div
       className={cn(
-        "rounded-2xl border-2 w-full",
-        variant === "points" && "bg-orange-400 border-orange-400",
-        variant === "hearts" && "bg-rose-400 border-rose-400"
+        "flex flex-col items-center justify-center gap-3 px-6 py-5 rounded-2xl border transition-all",
+        "bg-card border-border shadow-sm hover:shadow-md hover:bg-section"
       )}
     >
-      <div
-        className={cn(
-          "p-1.5 text-white rounded-t-xl font-bold text-center uppercase text-xs",
-          variant === "hearts" && "bg-rose-500",
-          variant === "points" && "bg-orange-500"
-        )}
-      >
-        {variant === "hearts" ? "Hearts Left" : "Total XP"}
+      <div className="flex items-center gap-3">
+        <Image
+          src={imageSrc}
+          alt={label}
+          width={34}
+          height={34}
+          className={cn(
+            "drop-shadow-sm",
+            variant === "points" && "hue-rotate-[330deg]",
+            variant === "hearts" && "brightness-110"
+          )}
+        />
+        <span
+          className={cn(
+            "text-2xl font-semibold tracking-tight",
+            variant === "hearts" && "text-rose-500",
+            variant === "points" && "text-orange-500"
+          )}
+        >
+          {value}
+        </span>
       </div>
-      <div
-        className={cn(
-          "rounded-2xl bg-white items-center flex justify-center p-6 font-bold text-lg",
-          variant === "points" && "text-orange-500",
-          variant === "hearts" && "text-rose-500",
-        )}
-      >
-        <Image alt="Icon" src={imageSrc} height={30} width={30} className="mr-1.5"/>
-        {value}
-      </div>
+      <p className="text-sm text-muted-foreground font-medium">{label}</p>
     </div>
   );
 };

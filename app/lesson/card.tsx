@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
 import { useKey } from "react-use";
-import { Volume2 } from "lucide-react"; // 🎧 icon
+import { Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -34,87 +34,83 @@ export const Card = ({
   const ttsCache = useRef<Map<string, string>>(new Map());
   const [playing, setPlaying] = useState(false);
 
-  const handleListen = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation(); 
-    try {
+  const handleListen = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
       if (playing) return;
       setPlaying(true);
 
-      if (ttsCache.current.has(text)) {
-        const cachedUrl = ttsCache.current.get(text)!;
-        new Audio(cachedUrl).play().catch(() => {});
+      try {
+        if (ttsCache.current.has(text)) {
+          const cachedUrl = ttsCache.current.get(text)!;
+          new Audio(cachedUrl).play().catch(() => {});
+          setPlaying(false);
+          return;
+        }
+
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+
+        if (!res.ok) {
+          setPlaying(false);
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        ttsCache.current.set(text, url);
+
+        const audio = new Audio(url);
+        audio.onended = () => setPlaying(false);
+        audio.play().catch(() => setPlaying(false));
+      } catch {
         setPlaying(false);
-        return;
       }
-
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-
-      if (!res.ok) {
-        console.error("TTS fetch failed:", await res.text());
-        setPlaying(false);
-        return;
-      }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      ttsCache.current.set(text, url);
-
-      const audio = new Audio(url);
-      audio.onended = () => setPlaying(false);
-      audio.play().catch(() => setPlaying(false));
-    } catch (error) {
-      console.error("TTS error:", error);
-      setPlaying(false);
-    }
-  }, [text, playing]);
+    },
+    [text, playing]
+  );
 
   const handleCardClick = useCallback(() => {
-    if (disabled) return;
-    onClick();
+    if (!disabled) onClick();
   }, [disabled, onClick]);
 
   useKey(shortcut, handleCardClick, {}, [handleCardClick]);
 
-  return (
-    <div
-      onClick={handleCardClick}
-      className={cn(
-        "h-full border-2 rounded-xl border-b-4 hover:bg-black/5 p-4 lg:p-6 cursor-pointer active:border-b-2",
-        selected && "border-sky-300 bg-sky-100 hover:bg-sky-100",
-        selected &&
-          status === "correct" &&
-          "border-green-300 bg-green-100 hover:bg-green-100",
-        selected &&
-          status === "wrong" &&
-          "border-rose-300 bg-rose-100 hover:bg-rose-100",
-        disabled && "pointer-events-none hover:bg-white",
-        type === "ASSIST" && "lg:p-3 w-full"
-      )}
-    >
-      {imageSrc && (
-        <div className="relative aspect-square mb-4 max-h-[80px] lg:max-h-[150px] w-full">
-          <Image src={imageSrc} fill alt={text} />
-        </div>
-      )}
+  const base =
+    "border rounded-xl p-5 transition-all duration-150 cursor-pointer select-none border-border hover:bg-section";
+  const state = cn(
+    selected && "border-primary bg-primary/5",
+    selected && status === "correct" && "border-green-500 bg-green-50",
+    selected && status === "wrong" && "border-rose-500 bg-rose-50",
+    disabled && "opacity-60 cursor-not-allowed"
+  );
 
+  // ASSIST → horizontal layout
+  if (type === "ASSIST") {
+    return (
       <div
-        className={cn(
-          "flex items-center justify-between",
-          type === "ASSIST" && "flex-row-reverse"
-        )}
+        onClick={handleCardClick}
+        className={cn(base, state, "flex items-center gap-5 w-full")}
       >
-        {type === "ASSIST" && <div />}
-        <div className="flex items-center gap-2">
+        {imageSrc && (
+          <div className="relative flex-shrink-0 w-[80px] h-[80px] rounded-lg overflow-hidden border border-border bg-muted">
+            <Image
+              src={imageSrc}
+              alt={text}
+              fill
+              className="object-contain bg-muted"
+            />
+          </div>
+        )}
+
+        <div className="flex items-start justify-between w-full">
           <p
             className={cn(
-              "text-neutral-600 text-sm lg:text-base",
-              selected && "text-sky-500",
-              selected && status === "correct" && "text-green-500",
-              selected && status === "wrong" && "text-rose-500"
+              "text-base leading-relaxed text-foreground",
+              selected && "text-primary font-medium"
             )}
           >
             {text}
@@ -123,27 +119,51 @@ export const Card = ({
           <Button
             onClick={handleListen}
             disabled={playing}
-            variant="super"
+            variant="ghost"
             size="sm"
-            title="Listen"
+            className="ml-4 shrink-0"
           >
-            <Volume2 className="h-4 w-4" />
+            <Volume2 className="h-4 w-4 text-primary" />
           </Button>
         </div>
-
-        <div
-          className={cn(
-            "lg:w-[30px] lg:h-[30px] w-[20px] h-[20px] border-2 flex items-center justify-center rounded-lg text-neutral-400 lg:text-[15px] text-xs font-semibold",
-            selected && "border-sky-300 text-sky-500",
-            selected &&
-              status === "correct" &&
-              "border-green-500 text-green-500",
-            selected && status === "wrong" && "border-rose-500 text-rose-500"
-          )}
-        >
-          {shortcut}
-        </div>
       </div>
+    );
+  }
+
+  // SELECT → vertical layout
+  return (
+    <div
+      onClick={handleCardClick}
+      className={cn(
+        base,
+        state,
+        "flex flex-col items-center justify-center text-center min-h-[200px] gap-4"
+      )}
+    >
+      {imageSrc && (
+        <div className="relative w-[100px] h-[100px] border border-border rounded-lg overflow-hidden bg-muted">
+          <Image src={imageSrc} alt={text} fill className="object-contain" />
+        </div>
+      )}
+
+      <p
+        className={cn(
+          "text-base leading-relaxed text-foreground whitespace-normal max-w-[90%]",
+          selected && "text-primary font-medium"
+        )}
+      >
+        {text}
+      </p>
+
+      <Button
+        onClick={handleListen}
+        disabled={playing}
+        variant="ghost"
+        size="sm"
+        className="mt-1"
+      >
+        <Volume2 className="h-4 w-4 text-primary" />
+      </Button>
     </div>
   );
 };

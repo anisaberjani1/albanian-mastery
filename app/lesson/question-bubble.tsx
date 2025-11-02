@@ -6,24 +6,17 @@ type Props = {
 
 export const QuestionBubble = ({ question }: Props) => {
   return (
-    <div className="flex items-center gap-x-4 mb-6">
+    <div className="flex items-center gap-4">
       <Image
         src="/mascot.png"
         alt="Mascot"
-        height={100}
-        width={100}
-        className="hidden lg:block"
+        height={70}
+        width={70}
+        className="rounded-full border border-border shadow-sm"
       />
-      <Image
-        src="/mascot.png"
-        alt="Mascot"
-        height={40}
-        width={40}
-        className="block lg:hidden"
-      />
-      <div className="relative py-2 px-4 border-2 rounded-xl text-sm lg:text-base">
-        {question}
-        <div className="absolute -left-3 top-1/2 w-0 h-0 border-x-8 border-x-transparent border-t-8 transform -translate-y-1/2 rotate-90" />
+      <div className="relative px-5 py-3 bg-card border border-border rounded-xl shadow-sm">
+        <p className="text-foreground text-base font-medium">{question}</p>
+        <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-y-6 border-y-transparent border-r-[6px] border-r-border" />
       </div>
     </div>
   );

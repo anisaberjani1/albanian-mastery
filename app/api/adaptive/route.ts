@@ -28,13 +28,9 @@ export async function POST(req: Request) {
     const nextDifficulty = determineNextDifficulty(accuracy, currentDifficulty);
 
     const prompt = `
-You are an AI exercise generator for an Albanian language learning app.
-Generate **up to 2 adaptive challenges** focused on the topic "${topic}" and difficulty "${nextDifficulty}".
-Each challenge should have:
-      - type: either "SELECT" or "ASSIST"
-      - question in English
-      - 4 answer options with 1 correct
-Return only valid JSON in this format:
+You are an Albanian language learning AI generator.
+Generate exactly **2 adaptive challenges** for the topic "${topic}" at difficulty "${nextDifficulty}".
+Each challenge must strictly follow this JSON format (no text outside the JSON):
 [
   {
     "type": "SELECT",
@@ -47,6 +43,7 @@ Return only valid JSON in this format:
     ]
   }
 ]
+Ensure your entire response is valid JSON only.
 `;
 
     const response = await openai.chat.completions.create({
@@ -56,16 +53,22 @@ Return only valid JSON in this format:
     });
 
     let aiText = response.choices[0].message?.content || "";
-    aiText = aiText.trim().replace(/```json|```/g, "");
+    aiText = aiText
+      .trim()
+      .replace(/```json|```/g, "")
+      .trim();
 
-    let generated;
+    let generated = [];
     try {
       generated = JSON.parse(aiText);
-    } catch {
-      console.error("❌ Invalid JSON from AI:", aiText);
+      if (!Array.isArray(generated)) {
+        throw new Error("Expected an array of challenges");
+      }
+    } catch (err) {
+      console.error("❌ Adaptive challenge JSON error:", aiText);
       return NextResponse.json(
-        { error: "Invalid JSON from AI" },
-        { status: 500 }
+        { error: "AI returned invalid JSON structure", raw: aiText },
+        { status: 400 }
       );
     }
 

@@ -7,20 +7,14 @@ type Props = {
   order: number;
   title: string;
   description: string;
-  lessons: (typeof lessons.$inferSelect & {
-    completed: boolean;
-  })[];
+  lessons: (typeof lessons.$inferSelect & { completed: boolean })[];
   activeLesson:
-    | (typeof lessons.$inferSelect & {
-        unit: typeof units.$inferSelect;
-      })
+    | (typeof lessons.$inferSelect & { unit: typeof units.$inferSelect })
     | undefined;
   activeLessonPercentage: number;
 };
 
 export const Unit = ({
-  id,
-  order,
   title,
   description,
   lessons,
@@ -28,9 +22,10 @@ export const Unit = ({
   activeLessonPercentage,
 }: Props) => {
   return (
-    <>
+    <section className="w-full space-y-10">
       <UnitBanner title={title} description={description} />
-      <div className="flex items-center flex-col relative">
+
+      <div className="relative flex flex-col gap-5 pl-4">
         {lessons.map((lesson, index) => {
           const isCurrent = lesson.id === activeLesson?.id;
           const isLocked = !lesson.completed && !isCurrent;
@@ -48,6 +43,6 @@ export const Unit = ({
           );
         })}
       </div>
-    </>
+    </section>
   );
 };

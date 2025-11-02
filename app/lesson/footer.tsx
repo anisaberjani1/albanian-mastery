@@ -11,48 +11,50 @@ type Props = {
 };
 
 export const Footer = ({ onCheck, status, disabled, lessonId }: Props) => {
-    useKey("Enter", onCheck, {}, [onCheck]);
-  const isMobile = useMedia("(max-width: 1024px)");
+  useKey("Enter", onCheck, {}, [onCheck]);
+  const isMobile = useMedia("(max-width: 1024px)", false);
+
   return (
     <footer
       className={cn(
-        "lg:h-[140px] h-[100px] border-t-2 mt-18",
-        status === "correct" && "border-transparent bg-green-100",
-        status === "wrong" && "border-transparent bg-rose-100"
+        "w-full border-t border-border bg-card py-6 px-8 flex items-center justify-between",
+        status === "correct" && "bg-green-50",
+        status === "wrong" && "bg-rose-50"
       )}
     >
-      <div className="max-w-[1140px] h-full mx-auto flex items-center justify-between px-6 lg:px-10">
-        {status === "correct" && (
-            <div className="text-green-500 font-bold text-base lg:text-2xl flex items-center">
-                <CheckCircle className="h-6 w-6 lg:h-10 lg:w-10 mr-4"/>
-                Nicely done!
-            </div>
-        )}
-        {status === "wrong" && (
-            <div className="text-rose-500 font-bold text-base lg:text-2xl flex items-center">
-                <XCircle className="h-6 w-6 lg:h-10 lg:w-10 mr-4"/>
-                Try again.
-            </div>
-        )}
-        {status === "completed" && (
-            <Button variant="default" size={isMobile ? "sm": "lg"} onClick={() => window.location.href = `/lesson/${lessonId}`}>
-                Practice again
-            </Button>
-        )}
+      {status === "correct" && (
+        <div className="text-green-600 font-semibold flex items-center gap-2 text-base lg:text-lg">
+          <CheckCircle className="h-6 w-6" />
+          Great job!
+        </div>
+      )}
+      {status === "wrong" && (
+        <div className="text-rose-600 font-semibold flex items-center gap-2 text-base lg:text-lg">
+          <XCircle className="h-6 w-6" />
+          Try again.
+        </div>
+      )}
+      {status === "completed" && (
         <Button
-          disabled={disabled}
-          className="ml-auto"
-          onClick={onCheck}
+          variant="secondary"
           size={isMobile ? "sm" : "lg"}
-          variant={status === "wrong" ? "danger" : "secondary"}
+          onClick={() => (window.location.href = `/lesson/${lessonId}`)}
         >
-          {status === "none" && "Check"}
-          {status === "correct" && "Next"}
-          {status === "wrong" && "Retry"}
-          {status === "completed" && "Continue"}
-
+          Practice again
         </Button>
-      </div>
+      )}
+      <Button
+        disabled={disabled}
+        onClick={onCheck}
+        size={isMobile ? "sm" : "lg"}
+        variant={status === "wrong" ? "danger" : "secondary"}
+        className="ml-auto"
+      >
+        {status === "none" && "Check"}
+        {status === "correct" && "Next"}
+        {status === "wrong" && "Retry"}
+        {status === "completed" && "Continue"}
+      </Button>
     </footer>
   );
 };

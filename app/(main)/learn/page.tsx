@@ -1,5 +1,3 @@
-import { FeedWrapper } from "@/components/feed-wrapper";
-import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
 import { Header } from "./header";
 import {
@@ -7,34 +5,24 @@ import {
   getLessonPercentage,
   getUnits,
   getUserProgress,
-  getUserSubscription,
 } from "@/db/queries";
 import { redirect } from "next/navigation";
 import { Unit } from "./unit";
 import { lessons, units as unitsSchema } from "@/db/schema";
-import { Promo } from "@/components/promo";
-import { Quests } from "@/components/quests";
 
 const LearnPage = async () => {
   const userProgressData = getUserProgress();
   const courseProgressData = getCourseProgress();
   const lessonPercentageData = getLessonPercentage();
   const unitsData = getUnits();
-  const userSubscriptionData = getUserSubscription();
 
-  const [
-    userProgress,
-    units,
-    courseProgress,
-    lessonPercentage,
-    userSubscription,
-  ] = await Promise.all([
-    userProgressData,
-    unitsData,
-    courseProgressData,
-    lessonPercentageData,
-    userSubscriptionData,
-  ]);
+  const [userProgress, units, courseProgress, lessonPercentage] =
+    await Promise.all([
+      userProgressData,
+      unitsData,
+      courseProgressData,
+      lessonPercentageData,
+    ]);
 
   if (!userProgress || !userProgress.activeCourse) {
     redirect("/courses");
@@ -43,42 +31,54 @@ const LearnPage = async () => {
     redirect("/courses");
   }
 
-  const isPro = !!userSubscription?.isActive;
-
   return (
-    <div className="flex flex-row-reverse gap-[48px] px-6">
-      <StickyWrapper>
-        <UserProgress
-          activeCourse={userProgress.activeCourse}
-          hearts={userProgress.hearts}
-          points={userProgress.points}
-          hasActiveSubscription={isPro}
-        />
-        {!isPro && <Promo />}
-        <Quests points={userProgress.points}/>
-      </StickyWrapper>
-      <FeedWrapper>
+    <div className="min-h-screen bg-section px-6 py-6">
+      <div className="max-w-[950px] mx-auto space-y-8">
         <Header title={userProgress.activeCourse.title} />
-        {units.map((unit) => (
-          <div key={unit.id} className="mb-10">
-            <Unit
-              id={unit.id}
-              order={unit.order}
-              description={unit.description}
-              title={unit.title}
-              lessons={unit.lessons}
-              activeLesson={
-                courseProgress.activeLesson as
-                  | (typeof lessons.$inferSelect & {
-                      unit: typeof unitsSchema.$inferSelect;
-                    })
-                  | undefined
-              }
-              activeLessonPercentage={lessonPercentage}
-            />
+
+        <div className="bg-white rounded-2xl shadow-sm border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <UserProgress
+            activeCourse={userProgress.activeCourse}
+            hearts={userProgress.hearts}
+            points={userProgress.points}
+          />
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+            <div className="text-center">
+              <p className="text-[var(--heading)] font-semibold text-lg">
+                {userProgress.points}
+              </p>
+              <p className="text-sm text-[var(--paragraph)]">Total Points</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[var(--heading)] font-semibold text-lg">
+                {userProgress.hearts}
+              </p>
+              <p className="text-sm text-[var(--paragraph)]">Hearts Left</p>
+            </div>
           </div>
-        ))}
-      </FeedWrapper>
+        </div>
+
+        <div className="flex flex-col gap-20 my-10">
+          {units.map((unit) => (
+              <Unit
+                key={unit.id}
+                id={unit.id}
+                order={unit.order}
+                description={unit.description}
+                title={unit.title}
+                lessons={unit.lessons}
+                activeLesson={
+                  courseProgress.activeLesson as
+                    | (typeof lessons.$inferSelect & {
+                        unit: typeof unitsSchema.$inferSelect;
+                      })
+                    | undefined
+                }
+                activeLessonPercentage={lessonPercentage}
+              />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

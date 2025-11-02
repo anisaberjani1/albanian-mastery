@@ -1,9 +1,9 @@
 import { challengeOptions, challenges } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { Card } from "./card";
+import { SplitCard } from "./split-card";
 
 type Props = {
-  options: (typeof challengeOptions.$inferSelect[]);
+  options: (typeof challengeOptions.$inferSelect)[];
   onSelect: (id: number) => void;
   status: "correct" | "wrong" | "none";
   selectedOption?: number;
@@ -22,27 +22,37 @@ export const Challenge = ({
   return (
     <div
       className={cn(
-        "grid gap-2",
-        type === "ASSIST" && "grid-cols-1",
-        type === "SELECT" &&
-          "grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))]"
+        "grid w-full gap-8 rounded-2xl border border-border bg-card shadow-sm p-6",
+        "lg:grid-cols-[35%_minmax(0,1fr)] grid-cols-1"
       )}
     >
-      {options.map((option, i) => (
-        <Card
-          key={option.id}
-          id={option.id}
-          text={option.text}
-          imageSrc={option.imageSrc}
-          shortcut={`${i + 1}`}
-          selected={selectedOption === option.id}
-          onClick={() => onSelect(option.id)}
-          status={status}
-          audioSrc={option.audioSrc}
-          disabled={disabled}
-          type={type}
-        />
-      ))}
+      <div className="flex flex-col items-center justify-center px-4 text-center">
+        {type === "ASSIST" ? (
+          <p className="text-lg font-semibold text-heading leading-relaxed">
+            Select the correct meaning
+          </p>
+        ) : (
+          <p className="text-lg font-semibold text-heading leading-relaxed">
+            Choose the correct translation
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3 overflow-visible w-full">
+        {options.map((option) => (
+          <SplitCard
+            key={option.id}
+            id={option.id}
+            text={option.text}
+            imageSrc={option.imageSrc}
+            audioSrc={option.audioSrc}
+            selected={selectedOption === option.id}
+            status={status}
+            onClick={() => onSelect(option.id)}
+            disabled={disabled}
+          />
+        ))}
+      </div>
     </div>
   );
 };

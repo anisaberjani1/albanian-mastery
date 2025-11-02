@@ -1,40 +1,36 @@
 import { Progress } from "@/components/ui/progress";
 import { useExitModal } from "@/store/use-exit-modal";
-import { InfinityIcon, X } from "lucide-react";
+import { X } from "lucide-react";
 import Image from "next/image";
 
 type Props = {
   hearts: number;
   percentage: number;
-  hasActiveSubscription: boolean;
 };
 
-export const Header = ({
-  hearts,
-  percentage,
-  hasActiveSubscription,
-}: Props) => {
+export const Header = ({ hearts, percentage }: Props) => {
   const { open } = useExitModal();
+
   return (
-    <header className="lg:pt-[50px] pt-[20px] px-10 flex gap-x-7 items-center justify-between max-w-[1140px] mx-auto w-full">
+    <header className="w-full flex items-center justify-between px-8 py-4 border-b border-border bg-card">
       <X
         onClick={open}
-        className="text-slate-500 hover::opacity-75 transition cursor-pointer"
+        className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
       />
-      <Progress value={percentage} />
-      <div className="text-rose-500 flex items-center font-bold">
+
+      <div className="flex flex-col items-center flex-1 px-8">
+        <Progress value={percentage} className="w-full h-2 rounded-full" />
+      </div>
+
+      <div className="flex items-center gap-2 font-semibold text-foreground">
         <Image
           src="/heart.png"
-          height={28}
-          width={28}
+          height={24}
+          width={24}
           alt="heart"
-          className="mr-2"
+          className="shrink-0"
         />
-        {hasActiveSubscription ? (
-          <InfinityIcon className="h-6 w-6 stroke-[3] shrink-0" />
-        ) : (
-          hearts
-        )}
+        <span className="text-primary">{hearts}</span>
       </div>
     </header>
   );

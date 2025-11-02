@@ -20,6 +20,7 @@ const buttonVariants = cva(
           "bg-[var(--background)] text-[var(--secondary)] border-2 border-[var(--secondary)] hover:bg-[color-mix(in_srgb,var(--secondary)_5%,white_95%)]",
         ghost:
           "bg-transparent text-[var(--foreground)] hover:bg-[var(--muted)] border-0",
+        danger: "bg-rose-500 text-white hover:bg-rose-600",
       },
       size: {
         default: "h-11 px-5 py-2",

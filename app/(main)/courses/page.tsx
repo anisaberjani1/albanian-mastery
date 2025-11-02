@@ -8,8 +8,8 @@ const CoursesPage = async () => {
     const[courses, userProgress] = await Promise.all([coursesData, userProgressData]);
 
   return (
-    <div className="h-full max-w-[912px] px-3 mx-auto">
-        <h1 className="text-2xl font-bold text-neutral-700">
+    <div className="h-full max-w-[912px] mx-auto py-6">
+        <h1 className="text-3xl font-semibold text-[var(--heading)] mb-8">
             Language Courses
         </h1>
         <List

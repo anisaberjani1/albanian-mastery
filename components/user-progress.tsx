@@ -1,62 +1,37 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { InfinityIcon } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 import { courses } from "@/db/schema";
 
 type Props = {
   activeCourse: typeof courses.$inferSelect;
   hearts: number;
   points: number;
-  hasActiveSubscription: boolean;
 };
 
-export const UserProgress = ({
-  activeCourse,
-  hearts,
-  points,
-  hasActiveSubscription,
-}: Props) => {
+export const UserProgress = ({ activeCourse, hearts, points }: Props) => {
   return (
-    <div className="flex items-center justify-between gap-x-2 w-full">
-      <Link href="/courses">
-        <Button variant="ghost">
+    <div className="flex items-center gap-4 pl-1">
+      <Link href="/courses" aria-label="Go back to courses">
           <Image
             src={activeCourse.imageSrc}
             alt={activeCourse.title}
-            className="rounded-md border"
-            width={32}
-            height={32}
+            className="rounded-md border hover:bg-primary/10 transition"
+            width={36}
+            height={36}
           />
-        </Button>
       </Link>
-      <Link href="/shop">
-        <Button variant="ghost" className="text-orange-500">
-          <Image
-            src="/points.png"
-            height={28}
-            width={28}
-            alt="Points"
-            className="mr-2"
-          />
-          {points}
-        </Button>
-      </Link>
-      <Link href="/shop">
-        <Button variant="ghost" className="text-rose-500">
-          <Image
-            src="/heart.png"
-            height={22}
-            width={22}
-            alt="Hearts"
-            className="mr-2"
-          />
-          {hasActiveSubscription ? (
-            <InfinityIcon className="h-4 w-4 stroke-[3]" />
-          ) : (
-            hearts
-          )}
-        </Button>
+      <Link href="/shop" aria-label="Open shop to refill hearts or view points">
+        <div className="flex items-center gap-4 cursor-pointer hover:opacity-90 transition">
+          <div className="flex items-center text-yellow-400 font-semibold">
+            <Star className="h-5 w-5 mr-1" />
+            {points}
+          </div>
+          <div className="flex items-center text-rose-500 font-semibold">
+            <Heart className="h-5 w-5 mr-1" />
+            {hearts}
+          </div>
+        </div>
       </Link>
     </div>
   );

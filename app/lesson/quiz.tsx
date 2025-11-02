@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { challengeOptions, challenges, userSubscription } from "@/db/schema";
+import { challengeOptions, challenges } from "@/db/schema";
 import { useState, useTransition, useEffect, useRef } from "react";
 import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
@@ -10,14 +10,15 @@ import { Footer } from "./footer";
 import { upsertChallengeProgress } from "@/actions/challenge-progress";
 import { toast } from "sonner";
 import { reduceHearts } from "@/actions/user-progress";
-import Image from "next/image";
-import Confetti from "react-confetti";
 import { ResultCard } from "./result-card";
 import { useRouter } from "next/navigation";
 import { useHeartsModal } from "@/store/use-hearts-modal";
 import { usePracticeModal } from "@/store/use-practice-modal";
-import { useMount, useWindowSize } from "react-use";
+import { useMount } from "react-use";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Volume2 } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 
 type Props = {
   initialPercentage: number;
@@ -27,9 +28,6 @@ type Props = {
     completed: boolean;
     challengeOptions: (typeof challengeOptions.$inferSelect)[];
   })[];
-  userSubscription:
-    | (typeof userSubscription.$inferSelect & { isActive: boolean })
-    | null;
   lessonTitle?: string;
 };
 
@@ -43,16 +41,15 @@ export const Quiz = ({
   initialHearts,
   initialLessonChallenges,
   initialLessonId,
-  userSubscription,
   lessonTitle = "General",
 }: Props) => {
+  const { user } = useUser();  
+  const userId = user?.id; 
   const { open: openHeartsModal } = useHeartsModal();
   const { open: openPracticeModal } = usePracticeModal();
   const router = useRouter();
-  const { width, height } = useWindowSize();
   const [pending, startTransition] = useTransition();
 
-  // Core lesson state
   const [lessonId] = useState(initialLessonId);
   const [hearts, setHearts] = useState(initialHearts);
   const [percentage, setPercentage] = useState(() =>
@@ -229,11 +226,11 @@ export const Quiz = ({
               setAdaptiveSelected(null);
               setAdaptiveStatus("none");
             } else {
-              toast.success("✅ You’ve completed all adaptive challenges!");
+              toast.success("You’ve completed all adaptive challenges!");
               setShowAdaptive(false);
               router.push("/learn");
             }
-          }, 1000);
+          }, 800);
         } else {
           playSound("/incorrect.wav");
           setAdaptiveStatus("wrong");
@@ -246,38 +243,63 @@ export const Quiz = ({
 
       return (
         <>
-          <div className="h-full flex flex-col items-center justify-center">
-            <div className="lg:min-h-[350px] lg:w-[600px] w-full px-6 lg:px-0 flex flex-col gap-y-12 pt-20">
-              <h1 className="text-lg lg:text-3xl text-center lg:text-start font-bold text-neutral-700 ps-16">
+          <Header hearts={hearts} percentage={percentage} />
+          <div className="flex-1 flex items-center justify-center w-full px-6 py-10">
+            <div className="w-full max-w-3xl bg-card border border-border rounded-2xl p-8 shadow-sm">
+              <h1 className="text-2xl font-bold text-heading text-center mb-8">
                 Adaptive Challenge {adaptiveIndex + 1}
               </h1>
-              <div className="w-full max-w-md px-6 text-center">
-                <p className="text-lg mb-6 font-semibold">
-                  {adaptive.question}
-                </p>
-                <div className="flex flex-col gap-3">
+
+              <div className="flex flex-col lg:grid lg:grid-cols-[40%_60%] gap-8 items-start">
+                <div className="text-center lg:text-left">
+                  <p className="text-lg font-medium text-foreground">
+                    {adaptive.question}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3 w-full">
                   {adaptiveOptions.map((opt: any, i: number) => (
                     <button
                       key={i}
                       onClick={() => onAdaptiveSelect(i)}
                       disabled={adaptiveStatus !== "none"}
-                      className={`border p-3 rounded-xl transition ${
-                        adaptiveSelected === i
-                          ? adaptiveStatus === "correct"
-                            ? "border-emerald-500 bg-emerald-100"
-                            : adaptiveStatus === "wrong"
-                            ? "border-rose-500 bg-rose-100"
-                            : "border-blue-400 bg-blue-50"
-                          : "border-gray-200 hover:bg-gray-50"
-                      }`}
+                      className={cn(
+                        "flex justify-between items-center border rounded-lg px-5 py-3 transition-all text-left",
+                        "hover:bg-section focus:ring-2 focus:ring-primary/30",
+                        adaptiveSelected === i &&
+                          adaptiveStatus === "correct" &&
+                          "border-green-500 bg-green-50",
+                        adaptiveSelected === i &&
+                          adaptiveStatus === "wrong" &&
+                          "border-rose-500 bg-rose-50",
+                        adaptiveSelected === i &&
+                          adaptiveStatus === "none" &&
+                          "border-primary bg-primary/5"
+                      )}
                     >
-                      {opt.text}
+                      <span className="text-base text-foreground">
+                        {opt.text}
+                      </span>
+                      {opt.audio && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="ml-2 shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            new Audio(opt.audio).play().catch(() => {});
+                          }}
+                        >
+                          <Volume2 className="h-4 w-4 text-primary" />
+                        </Button>
+                      )}
                     </button>
                   ))}
                 </div>
               </div>
             </div>
           </div>
+
           <Footer
             disabled={adaptiveSelected === null}
             status={adaptiveStatus}
@@ -289,68 +311,68 @@ export const Quiz = ({
 
     return (
       <>
-        <Confetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={400}
-          tweenDuration={8000}
-        />
-        <div className="flex flex-col gap-y-6 items-center justify-center text-center h-full max-w-lg mx-auto mt-20">
-          <Image
-            src="/finish.png"
-            alt="Finish"
-            height={50}
-            width={50}
-            className="hidden lg:block"
-          />
-          <h1 className="text-2xl font-bold text-neutral-700">
-            Great job! <br /> You’ve completed this lesson.
-          </h1>
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20">
+          <div className="w-full max-w-2xl bg-card border border-border rounded-2xl p-10 shadow-sm">
+            <h1 className="text-3xl font-bold text-heading mb-4">
+              Lesson Completed!
+            </h1>
+            <p className="text-muted-foreground mb-8">
+              Great progress — you’ve completed all challenges in this lesson.
+            </p>
 
-          <div className="flex items-center gap-x-4">
-            <ResultCard variant="points" value={challenges.length * 10} />
-            <ResultCard variant="hearts" value={hearts} />
+            <div className="flex justify-center gap-8 mb-10">
+              <ResultCard variant="points" value={challenges.length * 10} />
+              <ResultCard variant="hearts" value={hearts} />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button
+                onClick={() => router.push("/learn")}
+                variant="secondary"
+                size="lg"
+                className="w-full sm:w-auto"
+              >
+                Back to Learning
+              </Button>
+              <Button
+                onClick={async () => {
+                  setAdaptiveLoading(true);
+                  try {
+                    const res = await fetch("/api/adaptive", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        userId,
+                        topic,
+                        accuracy: percentage,
+                        currentDifficulty: "medium",
+                      }),
+                    });
+
+                    const data = await res.json();
+                    if (data?.success && data?.challenges?.length) {
+                      toast.success("Adaptive challenges ready!");
+                      setAdaptiveChallenges(data.challenges);
+                      setShowAdaptive(true);
+                      setAdaptiveIndex(0);
+                    } else {
+                      toast.error("No adaptive challenges were generated.");
+                    }
+                  } catch {
+                    toast.error("Error fetching adaptive challenges.");
+                  } finally {
+                    setAdaptiveLoading(false);
+                  }
+                }}
+                disabled={adaptiveLoading}
+                variant="primary"
+                size="lg"
+                className="w-full sm:w-auto"
+              >
+                {adaptiveLoading ? "Generating..." : `Try Adaptive Challenges`}
+              </Button>
+            </div>
           </div>
-
-          <Button
-            onClick={async () => {
-              setAdaptiveLoading(true);
-              try {
-                const res = await fetch("/api/adaptive", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    userId: "test_user",
-                    topic: topic,
-                    accuracy: percentage,
-                    currentDifficulty: "medium",
-                  }),
-                });
-
-                const data = await res.json();
-                if (data?.success && data?.challenges?.length) {
-                  toast.success("Adaptive challenges generated!");
-                  setAdaptiveChallenges(data.challenges);
-                  setShowAdaptive(true);
-                  setAdaptiveIndex(0);
-                } else {
-                  toast.error("No adaptive challenges were generated.");
-                }
-              } catch (err) {
-                toast.error("Error fetching adaptive challenges.");
-              } finally {
-                setAdaptiveLoading(false);
-              }
-            }}
-            disabled={adaptiveLoading}
-            variant="primary"
-            size="default"
-          >
-            {adaptiveLoading
-              ? "Generating..."
-              : `🔥 Try Extra Adaptive Challenges on ${topic}`}
-          </Button>
         </div>
 
         <Footer
@@ -369,41 +391,35 @@ export const Quiz = ({
 
   return (
     <>
-      <Header
-        hearts={hearts}
-        percentage={percentage}
-        hasActiveSubscription={!!userSubscription?.isActive}
-      />
-      <div className="flex-1">
-        <div className="h-full flex flex-col items-center justify-center">
-          <div className="lg:min-h-[350px] lg:w-[600px] w-full px-6 lg:px-0 flex flex-col gap-y-12 pt-20">
-            <h1 className="text-lg lg:text-3xl text-center lg:text-start font-bold text-neutral-700">
-              {title}
-            </h1>
+      <Header hearts={hearts} percentage={percentage} />
+      <main className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-160px)] px-6 py-10 bg-section">
+        <div className="w-full max-w-3xl flex flex-col gap-10">
+          <h1 className="text-2xl lg:text-3xl font-bold text-heading text-center">
+            {title}
+          </h1>
 
-            <div>
-              {challenge.type === "ASSIST" && (
-                <QuestionBubble question={challenge.question} />
-              )}
-
-              <Challenge
-                options={options}
-                onSelect={onSelect}
-                status={status}
-                selectedOption={selectedOption}
-                disabled={pending}
-                type={challenge.type}
-              />
-
-              {feedback && (
-                <p className="text-sm text-center text-rose-600 mt-4 italic">
-                  💡 {feedback}
-                </p>
-              )}
+          {challenge.type === "ASSIST" && (
+            <div className="flex justify-center">
+              <QuestionBubble question={challenge.question} />
             </div>
-          </div>
+          )}
+
+          <Challenge
+            options={options}
+            onSelect={onSelect}
+            status={status}
+            selectedOption={selectedOption}
+            disabled={pending}
+            type={challenge.type}
+          />
+
+          {feedback && (
+            <p className="text-sm text-center text-secondary font-medium italic">
+              💡 {feedback}
+            </p>
+          )}
         </div>
-      </div>
+      </main>
 
       <Footer
         disabled={pending || !selectedOption}
