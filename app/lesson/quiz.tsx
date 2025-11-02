@@ -43,8 +43,8 @@ export const Quiz = ({
   initialLessonId,
   lessonTitle = "General",
 }: Props) => {
-  const { user } = useUser();  
-  const userId = user?.id; 
+  const { user } = useUser();
+  const userId = user?.id;
   const { open: openHeartsModal } = useHeartsModal();
   const { open: openPracticeModal } = usePracticeModal();
   const router = useRouter();
@@ -67,6 +67,7 @@ export const Quiz = ({
   const [status, setStatus] = useState<"correct" | "wrong" | "none">("none");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [attempts, setAttempts] = useState<number>(0);
+  const [totalAttempts, setTotalAttempts] = useState<number>(0);
   const feedbackCache = useRef<Record<string, string>>({});
 
   const [adaptiveChallenges, setAdaptiveChallenges] = useState<any[]>([]);
@@ -166,6 +167,7 @@ export const Quiz = ({
             playSound("/incorrect.wav");
             setStatus("wrong");
             setAttempts((prev) => prev + 1);
+            setTotalAttempts((prev) => prev + 1);
             if (!response?.error) setHearts((prev) => Math.max(prev - 1, 0));
 
             const userOption = options.find((o) => o.id === selectedOption);
@@ -257,7 +259,7 @@ export const Quiz = ({
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3 w-full">
+                <div className="flex flex-col gap-3 w-full pr-6">
                   {adaptiveOptions.map((opt: any, i: number) => (
                     <button
                       key={i}
@@ -344,7 +346,7 @@ export const Quiz = ({
                       body: JSON.stringify({
                         userId,
                         topic,
-                        accuracy: percentage,
+                        attempts: Math.max(1, totalAttempts),
                         currentDifficulty: "medium",
                       }),
                     });

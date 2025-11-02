@@ -14,7 +14,7 @@ const font = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "AI-Powered Language Learning Platform",
+  title: "Albanian Mastery",
   description: "AI-powered personalized Albanian learning platform.",
 };
 

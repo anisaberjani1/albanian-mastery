@@ -20,7 +20,7 @@ export const HeartsModal = () => {
 
     const onClick = () => {
         close();
-        router.push("/store");
+        router.push("/shop");
     }
 
     if(!isClient){
@@ -30,20 +30,20 @@ export const HeartsModal = () => {
     return (
         <Dialog open={isOpen} onOpenChange={close}>
             <DialogContent className="max-w-md rounded-2xl border border-border shadow-lg bg-white">
-                <DialogHeader className="space-y-3">
-                    <div className="flex justify-center">
+                <DialogHeader className="flex flex-col items-center text-center space-y-3">
+
                         <Image src='/mascot_bad.png' alt="Mascot" height={90} width={90}/>
-                    </div>
+
                     <DialogTitle className="text-center font-bold text-2xl text-foreground">You’ve out of hearts</DialogTitle>
                     <DialogDescription className="text-center text-base text-muted-foreground">
                         You’ve used all your hearts. Use your points to buy more or keep practicing to earn them back.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="flex flex-col gap-3 w-full mt-6">
-                        <Button variant="primary" className="w-full" size='lg' onClick={onClick}>
+                        <Button variant="primary" className="w-full" size='sm' onClick={onClick}>
                             Buy hearts with points
                         </Button>
-                        <Button variant="primaryOutline" className="w-full" size='lg' onClick={close}>
+                        <Button variant="primaryOutline" className="w-full" size='sm' onClick={close}>
                             Keep practicing
                         </Button>
                 </DialogFooter>

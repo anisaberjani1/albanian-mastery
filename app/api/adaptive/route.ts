@@ -4,19 +4,25 @@ import { adaptiveChallenges } from "@/db/schema";
 import { openai } from "@/lib/openai";
 
 function determineNextDifficulty(accuracy: number, current: string) {
-  if (accuracy >= 85) return "hard";
-  if (accuracy <= 50) return "easy";
-  return current || "medium";
+  if (accuracy >= 85) return "HARD";
+  if (accuracy <= 50) return "EASY";
+  return current?.toUpperCase() || "MEDIUM";
+}
+
+function calculateAccuracy(attempts: number): number {
+  const penalty = (attempts - 1) * 30;
+  return Math.max(10, 100 - penalty);
 }
 
 export async function POST(req: Request) {
   try {
+    const body = await req.json();
     const {
       userId,
       topic,
-      accuracy = 0,
-      currentDifficulty = "medium",
-    } = await req.json();
+      attempts = 1,
+      currentDifficulty = "MEDIUM",
+    } = body;
 
     if (!userId || !topic) {
       return NextResponse.json(
@@ -25,11 +31,12 @@ export async function POST(req: Request) {
       );
     }
 
+    const accuracy = calculateAccuracy(attempts);
     const nextDifficulty = determineNextDifficulty(accuracy, currentDifficulty);
 
     const prompt = `
 You are an Albanian language learning AI generator.
-Generate exactly **2 adaptive challenges** for the topic "${topic}" at difficulty "${nextDifficulty}".
+Generate exactly 2 adaptive challenges for the topic "${topic}" at difficulty "${nextDifficulty}".
 Each challenge must strictly follow this JSON format (no text outside the JSON):
 [
   {
@@ -43,7 +50,7 @@ Each challenge must strictly follow this JSON format (no text outside the JSON):
     ]
   }
 ]
-Ensure your entire response is valid JSON only.
+Ensure the entire response is valid JSON only.
 `;
 
     const response = await openai.chat.completions.create({
@@ -52,18 +59,13 @@ Ensure your entire response is valid JSON only.
       temperature: 0.8,
     });
 
-    let aiText = response.choices[0].message?.content || "";
-    aiText = aiText
-      .trim()
-      .replace(/```json|```/g, "")
-      .trim();
+    let aiText = response.choices[0].message?.content?.trim() || "";
+    aiText = aiText.replace(/```json|```/g, "").trim();
 
     let generated = [];
     try {
       generated = JSON.parse(aiText);
-      if (!Array.isArray(generated)) {
-        throw new Error("Expected an array of challenges");
-      }
+      if (!Array.isArray(generated)) throw new Error("Expected an array of challenges");
     } catch (err) {
       console.error("❌ Adaptive challenge JSON error:", aiText);
       return NextResponse.json(
@@ -79,12 +81,13 @@ Ensure your entire response is valid JSON only.
       topic,
       difficulty: nextDifficulty,
       accuracy,
-      feedback: `Generated ${trimmed.length} adaptive challenges.`,
+      feedback: `Generated ${trimmed.length} adaptive challenges at ${nextDifficulty} difficulty.`,
     });
 
     return NextResponse.json({
       success: true,
       difficulty: nextDifficulty,
+      accuracy,
       challenges: trimmed,
     });
   } catch (error) {

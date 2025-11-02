@@ -15,13 +15,6 @@ export const Header = () => {
     <header className="w-full h-20 bg-white border-b border-[var(--border)] shadow-sm">
       <div className="max-w-[1280px] mx-auto flex items-center justify-between h-full px-6">
         <Link href="/" className="flex items-center gap-3">
-          {/* <Image
-            src="/logo1.png"
-            height={46}
-            width={46}
-            alt="Logo"
-            className="drop-shadow-sm"
-          /> */}
           <span className="text-2xl font-extrabold text-[var(--foreground)] tracking-wide">
             Albanian
           </span>
