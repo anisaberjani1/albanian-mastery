@@ -29,28 +29,23 @@ export const HeartsModal = () => {
 
     return (
         <Dialog open={isOpen} onOpenChange={close}>
-            <DialogContent>
-                <DialogHeader>
-                    <div className="flex items-center w-full justify-center mb-3">
-                        <Image src='/mascot_bad.png' alt="Mascot" height={80} width={80}/>
+            <DialogContent className="max-w-md rounded-2xl border border-border shadow-lg bg-white">
+                <DialogHeader className="space-y-3">
+                    <div className="flex justify-center">
+                        <Image src='/mascot_bad.png' alt="Mascot" height={90} width={90}/>
                     </div>
-                    <DialogTitle className="text-center font-bold text-2xl">You ran out of hearts!</DialogTitle>
-                    <DialogDescription className="text-center text-base">
-                        Get Pro for unlimited hearts, or purchase them in the store
+                    <DialogTitle className="text-center font-bold text-2xl text-foreground">You’ve out of hearts</DialogTitle>
+                    <DialogDescription className="text-center text-base text-muted-foreground">
+                        You’ve used all your hearts. Use your points to buy more or keep practicing to earn them back.
                     </DialogDescription>
-
                 </DialogHeader>
-                <DialogFooter className="mb-4">
-                    <div className="flex flex-col gap-y-4 w-full">
+                <DialogFooter className="flex flex-col gap-3 w-full mt-6">
                         <Button variant="primary" className="w-full" size='lg' onClick={onClick}>
-                            Get unlimited hearts
+                            Buy hearts with points
                         </Button>
-                    </div>
-                    <div className="flex flex-col gap-y-4 w-full">
                         <Button variant="primaryOutline" className="w-full" size='lg' onClick={close}>
-                            No thanks
+                            Keep practicing
                         </Button>
-                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

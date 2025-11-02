@@ -1,57 +1,60 @@
-// import { FeedWrapper } from "@/components/feed-wrapper";
-// import { StickyWrapper } from "@/components/sticky-wrapper";
-// import { UserProgress } from "@/components/user-progress";
-// import { getUserProgress, getUserSubscription } from "@/db/queries";
-// import Image from "next/image";
-// import { redirect } from "next/navigation";
-// import { Items } from "./items";
-// import { Promo } from "@/components/promo";
-// import { Quests } from "@/components/quests";
+import { UserProgress } from "@/components/user-progress";
+import { getUserProgress } from "@/db/queries";
+import Image from "next/image";
+import { redirect } from "next/navigation";
+import { Items } from "./items";
 
-// const ShopPage = async () => {
-//   const userProgressData = getUserProgress();
-//   const userSubscriptionData = getUserSubscription();
-//   const [userProgress, userSubscription] = await Promise.all([
-//     userProgressData,
-//     userSubscriptionData,
-//   ]);
+const ShopPage = async () => {
+  const userProgressData = getUserProgress();
 
-//   if (!userProgress || !userProgress.activeCourse) {
-//     redirect("/courses");
-//   }
+  const [userProgress] = await Promise.all([userProgressData]);
 
-//   const isPro = !!userSubscription?.isActive;
+  if (!userProgress || !userProgress.activeCourse) {
+    redirect("/courses");
+  }
 
-//   return (
-//     <div className="flex flex-row-reverse gap-[48px] px-6">
-//       <StickyWrapper>
-//         <UserProgress
-//           activeCourse={userProgress.activeCourse}
-//           hearts={userProgress.hearts}
-//           points={userProgress.points}
-//           hasActiveSubscription={isPro}
-//         />
-//         {!isPro && <Promo />}
-//         <Quests points={userProgress.points}/>
-//       </StickyWrapper>
-//       <FeedWrapper>
-//         <div className="w-full flex flex-col items-center">
-//           <Image src="/shop.png" alt="shop" height={90} width={90} />
-//         </div>
-//         <h1 className="text-center font-bold text-neutral-800 text-2xl my-6">
-//           Shop
-//         </h1>
-//         <p className="text-muted-foreground text-center text-lg mb-6">
-//           Spend your points on cool stuff.
-//         </p>
-//         <Items
-//           hearts={userProgress.hearts}
-//           points={userProgress.points}
-//           hasActiveSubscription={isPro}
-//         />
-//       </FeedWrapper>
-//     </div>
-//   );
-// };
+  return (
+    <div className="min-h-screen bg-section px-6 py-6">
+      <div className="max-w-[950px] mx-auto space-y-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-border p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <UserProgress
+            activeCourse={userProgress.activeCourse}
+            hearts={userProgress.hearts}
+            points={userProgress.points}
+          />
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+            <div className="text-center">
+              <p className="text-[var(--heading)] font-semibold text-lg">
+                {userProgress.points}
+              </p>
+              <p className="text-sm text-[var(--paragraph)]">Total Points</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[var(--heading)] font-semibold text-lg">
+                {userProgress.hearts}
+              </p>
+              <p className="text-sm text-[var(--paragraph)]">Hearts Left</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl border border-border shadow-sm p-10 text-center">
+          <div className="flex flex-col items-center mb-8">
+            <Image src="/shop.png" alt="shop" height={90} width={90} />
+            <h1 className="text-3xl font-bold text-heading mt-4">
+                Shop
+            </h1>
+            <p className="text-muted-foreground text-lg mt-2">
+                Spend your points to refill hearts and keep learning.
+            </p>
+          </div>
+          <Items
+            hearts={userProgress.hearts}
+            points={userProgress.points}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
-// export default ShopPage;
+export default ShopPage;
