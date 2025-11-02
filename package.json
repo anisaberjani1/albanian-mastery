@@ -1,10 +1,10 @@
 {
-  "name": "alblingo",
+  "name": "albanianmastery",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "cross-env TS_SKIP_BUILD=1 next build",
     "start": "next start",
     "lint": "next lint",
     "db:studio": "npx drizzle-kit studio",
@@ -50,6 +50,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",

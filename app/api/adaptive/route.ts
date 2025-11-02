@@ -66,7 +66,7 @@ Ensure the entire response is valid JSON only.
     try {
       generated = JSON.parse(aiText);
       if (!Array.isArray(generated)) throw new Error("Expected an array of challenges");
-    } catch (err) {
+    } catch {
       console.error("❌ Adaptive challenge JSON error:", aiText);
       return NextResponse.json(
         { error: "AI returned invalid JSON structure", raw: aiText },
