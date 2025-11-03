@@ -228,7 +228,6 @@ export const Quiz = ({
               setAdaptiveSelected(null);
               setAdaptiveStatus("none");
             } else {
-              toast.success("You’ve completed all adaptive challenges!");
               setShowAdaptive(false);
               router.push("/learn");
             }
@@ -353,7 +352,6 @@ export const Quiz = ({
 
                     const data = await res.json();
                     if (data?.success && data?.challenges?.length) {
-                      toast.success("Adaptive challenges ready!");
                       setAdaptiveChallenges(data.challenges);
                       setShowAdaptive(true);
                       setAdaptiveIndex(0);
