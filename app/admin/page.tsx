@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import AdminClient from "./admin-client";
 
 
-const AdminPage = () => {
-  if (!isAdmin()) {
+const AdminPage = async () => {
+  const admin = await isAdmin();
+  if (!admin) {
     redirect("/");
   }
 

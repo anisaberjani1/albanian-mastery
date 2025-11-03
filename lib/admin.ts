@@ -1,8 +1,5 @@
+import { adminIds } from "@/constants";
 import { auth } from "@clerk/nextjs/server"
-
-export const adminIds = [
-    "user_2z30tZ6KqFMh5N6QdDsjY328eB5",
-];
 
 export const isAdmin = async () => {
     const {userId} = await auth();
